@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<!-- saved from url=(0087)file:///D:/henry/IT/programming/project/git/d3charts/examples/others/testD3js_dial.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><style>body {opacity: 0;}</style><style>element {display: none !important;} /* injected by platform.js */</style><style>template {display: none !important;} /* injected by platform.js */</style><style shadowcssshim="">style { display: none !important; }
+</style>
+    <title>Speedometer</title>
+    <link rel="stylesheet" href="./Speedometer_files/css" type="text/css">
+    
+    <script type="text/javascript" src="./Speedometer_files/d3.v3.js"></script>
+    <script type="text/javascript" src="./Speedometer_files/polymer.min.js"></script><style>[touch-action="none"]{ -ms-touch-action: none; touch-action: none; }[touch-action="auto"]{ -ms-touch-action: auto; touch-action: auto; }[touch-action="pan-x"]{ -ms-touch-action: pan-x; touch-action: pan-x; }[touch-action="pan-y"]{ -ms-touch-action: pan-y; touch-action: pan-y; }[touch-action="pan-x pan-y"],[touch-action="pan-y pan-x"]{ -ms-touch-action: pan-x pan-y; touch-action: pan-x pan-y; }</style>
+    <script type="text/javascript" src="./Speedometer_files/iopctrl.js"></script>
+    
+    <style>
+        body {
+            font: 16px arial;
+            background-color: #515151;
+        }
+
+        .unselectable {
+            -moz-user-select: -moz-none;
+            -khtml-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* css formats for the gauge */
+		.bandpath {
+			stroke:#f00;
+			stroke-width: 2px;
+			fill:#0f0;
+			opacity:0.5;
+		}
+		
+        .gauge .domain {
+            stroke-width: 2px;
+            stroke: #fff;
+			opacity:0.1;
+			fill:#00f;
+        }
+
+        .gauge .tick line {
+            stroke: #fff;
+            stroke-width: 2px;
+        }
+        
+        .gauge line {
+            stroke: #fff;
+        }
+
+        .gauge .arc, .gauge .cursor {
+			fill:#000;
+            opacity: 1;
+        }
+
+        .gauge .major {
+            fill: #fff;
+            font-size: 20px;
+            font-family: 'Play', verdana, sans-serif;
+            font-weight: normal;
+        }
+        
+        .gauge .indicator {
+            stroke: #EE3311;
+            fill: #000;
+            stroke-width: 4px;
+        }
+
+        /* css formats for the segment display */
+        .segdisplay .on {
+            fill: #00FFFF;
+
+        }
+
+        .segdisplay .off {
+            fill: #00FFFF;
+            opacity: 0.15;
+        }
+    </style>
+</head>
+<body style="-webkit-transition: opacity 0.3s; transition: opacity 0.3s; opacity: 1;">
+    <div>
+        <span id="speedometer"></span>
+    </div>
+    
+    <script>
+        var svg = d3.select("#speedometer")
+                .append("svg:svg")
+                .attr("width", 400)
+                .attr("height", 400);
+
+
+        var gauge = iopctrl.arcslider()
+                .radius(120)
+                .events(true)
+				.bands([{domain:[40, 100], span:[.2, 0.8], class : 'bandpath'}])
+                .indicator(iopctrl.defaultGaugeIndicator);
+        gauge.axis().orient("out")
+				.innerRadius(100)
+				.outerRadius(120)
+                .normalize(true)
+                .ticks(12)
+                .tickSubdivide(3)
+                .tickSize(10, 8, 10)
+                .tickPadding(5)
+                .scale(d3.scale.linear()
+                        .domain([0, 160])
+                        .range([-3*Math.PI/4, 3*Math.PI/4]));
+
+        var segDisplay = iopctrl.segdisplay()
+                .width(80)
+                .digitCount(6)
+                .negative(false)
+                .decimals(0);
+
+        svg.append("g")
+                .attr("class", "segdisplay")
+                .attr("transform", "translate(130, 200)")
+                .call(segDisplay);
+
+        svg.append("g")
+                .attr("class", "gauge")
+                .call(gauge);
+
+        segDisplay.value(56749);
+        gauge.value(92);
+    
+    </script>
+</body></html>

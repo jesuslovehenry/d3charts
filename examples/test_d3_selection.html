@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<body>
+<script src="../lib/d3.v3.js"></script>
+<script>
+var data1 = [{a:1, b:11},{a:2, b:12},{a:3, b:13}];
+var data2 = [{a:1, b:15},{a:3, b:16},{a:4, b:17}];
+
+var root = d3.select('body');
+root.selectAll('div').data(data1).enter().append('div').text(function(d){return d.a});
+root.selectAll('div').data(data2, function(d){return d.a;}).enter().append('div').text(function(d){return d.a});
+console.log(d3.selectAll('div'));
+</script>
+</body>

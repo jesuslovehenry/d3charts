@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+<script type="text/javascript" src="../lib/d3.v3.js"></script>
+<style>
+.bar {
+  fill: steelblue;
+}
+    
+.axis text {
+  font: 10px sans-serif;
+}
+    
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+</style>
+<body>
+<svg class="chart"></svg>
+<script>
+// Define data.
+var data = [{
+        name : "Locke",
+        value : 4
+    }, {
+        name : "Reyes",
+        value : 8
+    }, {
+        name : "Ford",
+        value : 15
+    }, {
+        name : "Jarrah",
+        value : 16
+    }, {
+        name : "Shephard",
+        value : 23
+    }, {
+        name : "Kwon",
+        value : 42
+    }
+];
+
+// Define chart bounds.
+var margin = {
+    top : 10,
+    right : 10,
+    bottom : 10,
+    left : 10
+},
+width = 600 - margin.left - margin.right,
+height = 400 - margin.top - margin.bottom,
+chartEntityBounds = {},
+chartTitleBounds = {},
+plotBounds = {},
+xAxisBounds = {},
+yAxisBounds = {},
+seriesBounds = {};
+
+// Create chart object.
+var chartEntity = d3.select(".chart")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("class", "chart-entity")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+chartEntityBounds = {
+    x : margin.left,
+    y : margin.top,
+    width : width,
+    height : height
+};
+
+// Set chart title.
+var chartTitle = chartEntity.append('g').attr('class', 'chart-title');
+//.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+var titleText = chartTitle.append('text').text('Bar Chart Title').attr('font-size', '30px');
+
+titleText.each(function () {
+    var box = this.getBBox();
+    titleText.attr('x', (chartEntityBounds.width - box.width) / 2);
+    titleText.attr('y', box.height);
+    chartTitleBounds = {
+        x : titleText.attr('x'),
+        y : 0,
+        width : box.width,
+        height : box.height
+    };
+    console.log(chartTitleBounds);
+});
+
+var chartPlot = chartEntity.append('g').attr('class', 'chart-plot');
+chartPlot.attr("transform", "translate(0," + chartTitleBounds.height + ")");
+plotBounds = {
+    x : 0,
+    y : chartTitleBounds.height,
+    width : chartEntityBounds.width,
+    height : chartEntityBounds.height - chartTitleBounds.height
+};
+
+// Create y axis.
+var y = d3.scale.linear()
+    .range([plotBounds.height, 0]);
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left");
+y.domain([0, d3.max(data, function (d) {
+            return d.value;
+        })]);
+
+var yAxisObj = chartPlot.append("g")
+    .attr("class", "y axis")
+    .call(yAxis);
+var yAxisBox;
+yAxisObj.each(function () {
+    yAxisBox = this.getBBox();
+    yAxisObj.attr("transform", "translate(" + Math.abs(yAxisBox.x) + ",0)");
+});
+
+// Create x axis.
+var x = d3.scale.ordinal()
+    .rangeRoundBands([0, plotBounds.width - yAxisBox.width], .1);
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+x.domain(data.map(function (d) {
+        return d.name;
+    }));
+var xAxisObj = chartPlot.append("g").attr("class", "x axis")
+    .call(xAxis);
+var xAxisBox, seriesHeight;
+xAxisObj.each(function () {
+    xAxisBox = this.getBBox();
+    seriesHeight = plotBounds.height - xAxisBox.height;
+    y.range([seriesHeight, 0]);
+    chartPlot.select("g .y.axis").call(yAxis);
+    xAxisObj.attr("transform", "translate(" + yAxisBox.width + "," + seriesHeight + ")");
+});
+yAxisBounds = {
+    x : 0,
+    y : 0,
+    width : yAxisBox.width,
+    height : seriesHeight
+};
+xAxisBounds = {
+    x : yAxisBox.width,
+    y : seriesHeight,
+    width : plotBounds.width - yAxisBox.wdith,
+    height : xAxisBox.height
+};
+
+var seriesGroup = chartPlot.append('g').attr('class', 'series-group').attr("transform", "translate(" + yAxisBounds.width + ",0)");
+seriesBounds = {
+    x : yAxisBounds.width,
+    y : 0,
+    width : xAxisBounds.width,
+    height : seriesHeight
+};
+
+var series0 = seriesGroup.append('g').attr('class', 'series-0');
+//series0.attr("transform", "translate(" + Math.abs(yAxisBox.x) + ",0)");
+series0.selectAll(".bar")
+.data(data)
+.enter().append("rect")
+.attr("class", "bar")
+.attr("x", function (d) {
+    return x(d.name);
+})
+.attr("y", function (d) {
+    return y(d.value);
+})
+.attr("height", function (d) {
+    return seriesBounds.height - y(d.value);
+})
+.attr("width", x.rangeBand());
+</script>
+</body>
+    
+    
+    
+    
+    

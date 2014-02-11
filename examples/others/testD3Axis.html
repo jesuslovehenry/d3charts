@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<meta charset='utf8' />
+<html>
+<head>
+<style>
+.bar {
+	fill: steelblue;
+}
+
+.axis text {
+	font: 10px sans-serif;
+}
+
+.axis path,.axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+</style>
+<script type="text/javascript" src="../../lib/d3.v3.js"></script>
+</head>
+<body>
+	<svg class="chart"></svg>
+	<script>
+        //Define data.
+        var data = [{
+            name : "Locke",
+            value : 4
+        }, {
+            name : "Reyes",
+            value : 8
+        }, {
+            name : "Ford",
+            value : 15
+        }, {
+            name : "Jarrah",
+            value : 16
+        }, {
+            name : "Shephard",
+            value : 23
+        }, {
+            name : "Kwon",
+            value : 42
+        }];
+
+        // Define chart bounds.
+        var margin = {
+            top : 10,
+            right : 10,
+            bottom : 10,
+            left : 10
+        }, width = 600 - margin.left - margin.right, height = 400 - margin.top -
+                margin.bottom;
+
+        // Create chart object.
+        var chart = d3.select(".chart").attr("width",
+                width + margin.left + margin.right).attr("height",
+                height + margin.top + margin.bottom).append("g").attr(
+                "transform",
+                "translate(" + margin.left + "," + margin.top + ")");
+
+        // Set chart title.
+        var chartTitle = d3.select('.chart').append('g').attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
+        var titleText = chartTitle.attr('class', 'chart_title').append('text')
+                .text('Bar Chart Title').attr('font-size', '40px');
+
+        var titleBox;
+        titleText.each(function() {
+            titleBox = this.getBBox();
+            console.log(titleBox);
+            titleText.attr('x',
+                    (d3.select(".chart").attr('width') - titleBox.width) / 2);
+            titleText.attr('y', titleBox.height);
+        });
+        var plotHeight = height - titleBox.height;
+
+        // adjust plot position.
+        var chartPlot = d3.select('.chart g');
+        chartPlot.attr("transform", "translate(" + margin.left + "," +
+                (margin.top + titleBox.height) + ")");
+
+        // Create y axis.
+        var y = d3.scale.linear().range([plotHeight, 0]);
+        var yAxis = d3.svg.axis().scale(y).orient("left");
+        y.domain([0, d3.max(data, function(d) {
+            return d.value;
+        })]);
+		yAxis.tickSubdivide(5);
+
+        var yAxisObj = chart.append("g").attr("class", "y axis").call(yAxis);
+        var yAxisBox;
+        yAxisObj.each(function() {
+            yAxisBox = this.getBBox();
+            yAxisObj.attr("transform", "translate(" + Math.abs(yAxisBox.x) +
+                    ",0)");
+        });
+
+        // Create x axis.
+        var x = d3.scale.ordinal().rangeRoundBands([0, width - yAxisBox.width],
+                .1);
+        var xAxis = d3.svg.axis().scale(x).orient("bottom");
+        x.domain(data.map(function(d) {
+            return d.name;
+        }));
+        var xAxisObj = chart.append("g").attr("class", "x axis").call(xAxis);
+        var xAxisBox, seriesHeight;
+        xAxisObj.each(function() {
+            xAxisBox = this.getBBox();
+            seriesHeight = plotHeight - xAxisBox.height;
+            y.range([seriesHeight, 0]);
+            chart.select("g .y.axis").call(yAxis);
+            xAxisObj.attr("transform", "translate(" + yAxisBox.width + "," +
+                    seriesHeight + ")");
+        });
+
+        var series0 = chart.append('g').attr('class', 'series-0');
+        series0.attr("transform", "translate(" + Math.abs(yAxisBox.x) + ",0)");
+        series0.selectAll(".bar").data(data).enter().append("rect").attr(
+                "class", "bar").attr("x", function(d) {
+            return x(d.name);
+        }).attr("y", function(d) {
+            return y(d.value);
+        }).attr("height", function(d) {
+            return seriesHeight - y(d.value);
+        }).attr("width", x.rangeBand());
+    </script>
+</body>
+</html>

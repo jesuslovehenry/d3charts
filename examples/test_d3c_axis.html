@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+<script type="text/javascript" src="../lib/d3.v3.js"></script>
+<script type="text/javascript" src="d3charts.src.js"></script>
+<style>
+.bar {
+  fill: steelblue;
+}
+    
+.axis text {
+  font: 10px sans-serif;
+}
+    
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+</style>
+<body>
+<svg class="chart"></svg>
+<script>
+var opts = {
+    enabled: true,
+	orient: 'bottom',
+    xOffset: 0, // The x offset relative to origin x of axis container, default is 0 
+    yOffset: 0, // The y offset relative to origin y of axis container, default is 0
+	fill: 'pink', // Default is undefined.
+    fillOpacity: 0.5,
+    title: { // Inherit from label options and add following additional options. 
+        position: '', // left/middle/right/top/bottom
+        
+    },
+    label: {
+        enabled: true,
+        fill: 'black',
+        fillOpacity: 1,
+        font: {
+             
+        },
+//        anchor: 'middle', // start/middle/end
+        rotation: 45,
+		rotationAnchor:'middle',
+        position: 'same', // 'same' or 'opposite', 'same' means label is at same side with major ticks, 'opposite' means different side with major ticks.
+        format: null
+    },
+    axisLine : {
+        enabled : true,
+        stroke : 'red',
+        strokeOpacity : 1,
+        strokeWidth : 1 // stroke-width
+    },
+    tick : {
+        enabled: true,
+        padding: 3,
+        scale: {
+//          stepNumber:0,
+//          stepInterval:0,
+//          min:,
+//          max:,
+//          autoExpand:false,// TRUE indicate to ignore min/max when actual
+            // value exceeds min/max
+        },
+        outerTickSize: 6,
+        showStartTickLabel: true,
+        showEndTickLabel: true,
+        major: {
+            enabled: true,
+            stroke: 'black',
+            strokeOpacity: 1,
+            strokeWidth: 1,
+            style: 'above',// cross/above/below
+            size: 10,
+            lineStepNumber: 1
+        },
+        minor: {
+            enabled: true,
+            count: 3,
+            stroke: 'black',
+            strokeOpacity: 1,
+            strokeWidth: 1,
+            style: 'above',// cross/above/below
+            size: 6
+        }
+    },
+    bands: { // Array
+        enabled: true,
+        type: 'line', // line or range
+//        x1: 0,
+//        x2: 0,
+        fill: 'black',
+        fillOpacity: 1,
+        border: {},
+        labelPosition: 'below', // above, below
+        label: {
+            enabled: false,
+            text:'',
+            font:{
+                fill: 'black',
+                fillOpacity: 1,
+                textAnchor: 'middle', // start/middle/end
+            },
+            fill: 'white',
+            fillOpacity: 1e-6,
+            border: {}, 
+        },
+        markerPosition: 'below', // above, below
+        marker: { // Only enabled for line band.
+            enabled: false,
+            type: 'circle',
+            size: 5,
+            border: {},
+            fill: 'white',
+            fillOpacity: 1
+        }
+    }
+};
+
+	var context = new d3charts.ChartContext();
+    var ll = new d3charts.Axis({}, context, opts);
+	ll.fScaleDomain([10, 80]).fWidth(800).fHeight(600);
+	var l = d3.select('svg').append('g');
+	l.attr('transform', 'translate(100, 100)');
+	var lUpdate = l.selectAll('.axis').data([opts]);
+	var lEnter = lUpdate.enter().append('g');
+	ll.fRender(lEnter);
+	
+	console.log(lEnter.bbox());
+	
+	ll.fRender(lEnter);
+</script>
+</body>
+    
+    
+    
+    
+    

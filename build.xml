@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="build-d3charts" basedir="." default="build">
+	<!-- common properties -->
+	<property name="root.dir" location="" />
+	<property name="src.dir" location="${root.dir}/src" />
+	<property name="test.dir" location="${root.dir}/test" />
+	<property name="build.dir" location="${root.dir}/build" />
+	<property name="concat.dir" location="${build.dir}/concat" />
+	<property name="minify.dir" location="${build.dir}/min" />
+	<property name="d3charts.js.src" location="${concat.dir}/d3charts.src.js" />
+	<property name="d3charts.js.min" location="${minify.dir}/d3chart.min.js" />
+	<property name="tools.dir" location="${root.dir}/tools" />
+
+	<property name="compressor.jar" location="${tools.dir}/yui-compressor/yuicompressor-2.4.6.jar" />
+	<!-- jsLint -->
+	<property name="jslint4java.dir" value="${tools.dir}/jslint4java" />
+	<property name="jslint4java.jar" value="${jslint4java.dir}/jslint4java-2.0.0.jar" />
+	<taskdef name="jslint" classname="com.googlecode.jslint4java.ant.JSLintTask" classpath="${jslint4java.jar}" />
+
+	<!-- jshint task -->
+	<!-- taskdef name="jshint" classname="com.philmander.jshint.JsHintAntTask" classpath="${tools.dir}/jshint/ant-jshint-0.3.6-SNAPSHOT-deps.jar" />
+
+	<target name="do-hint">
+		<jshint dir="${concat.dir}" options="node=true,
+		  es5=true,
+		  bitwise=true,
+		  curly=true,
+		  eqeqeq=true,
+		  forin=false,
+		  immed=true,
+		  latedef=true,
+		  newcap=true,
+		  noarg=true,
+		  noempty=true,
+		  nonew=true,
+		  plusplus=false,
+		  undef=true,
+		  strict=false,
+		  trailing=false,
+		  globalstrict=true,
+		  nonstandard=true,
+		  white=true,
+		  indent=4,
+		  expr=true,
+		  onevar=false" includes="d3charts.src.js" />
+	</target>
+
+	<target name="do-hint-parts" depends="do-hint-src,do-hint-test" />
+
+	<target name="do-hint-src">
+		<jshint dir="${src.dir}" options="node=true,
+			  es5=true,
+			  bitwise=true,
+			  curly=true,
+			  eqeqeq=true,
+			  forin=false,
+			  immed=true,
+			  latedef=true,
+			  newcap=true,
+			  noarg=true,
+			  noempty=true,
+			  nonew=true,
+			  plusplus=false,
+			  undef=false,
+			  strict=false,
+			  trailing=false,
+			  globalstrict=true,
+			  nonstandard=true,
+			  white=true,
+			  indent=4,
+			  expr=true,
+			  onevar=false" includes="**/*.js" />
+	</target>
+	<target name="do-hint-test">
+		<jshint dir="${test.dir}" options="node=true,
+				  es5=true,
+				  bitwise=true,
+				  curly=true,
+				  eqeqeq=true,
+				  forin=false,
+				  immed=true,
+				  latedef=true,
+				  newcap=true,
+				  noarg=true,
+				  noempty=true,
+				  nonew=true,
+				  plusplus=false,
+				  undef=true,
+				  strict=false,
+				  trailing=false,
+				  globalstrict=true,
+				  nonstandard=true,
+				  white=true,
+				  indent=4,
+				  expr=true,
+				  onevar=false" includes="**/*.js" />
+	</target -->
+
+	<target name="assemble" depends="clean">
+		<concat destfile="${d3charts.js.src}" encoding="UTF-8">
+			<filelist dir="${src.dir}">
+				<file name="begin.js" />
+				<file name="d3extension.js" />
+				<file name="core.js" />
+				<file name="utility.js" />
+				<file name="label.js" />
+				<file name="ledLabel.js" />
+				<file name="chart.js" />
+				<file name="title.js" />
+				<file name="axis.js" />
+				<file name="legend.js" />
+				<file name="plot.js" />
+				<file name="dial.js" />
+				<file name="linear.js" />
+				<file name="bullet.js" />
+				<file name="thermometer.js" />
+				<file name="end.js" />
+			</filelist>
+		</concat>
+	</target>
+
+	<target name="minify" depends="lint">
+		<apply executable="java" parallel="false" dest="${minify.dir}" taskname="yui">
+			<fileset dir="${concat.dir}">
+				<patternset>
+					<include name="d3charts.src.js" />
+				</patternset>
+			</fileset>
+			<arg line="-jar" />
+			<arg path="${compressor.jar}" />
+			<arg line="--charset UTF-8" />
+			<arg line="-v" />
+			<srcfile />
+			<arg line="-o" />
+			<mapper type="glob" from="*.src.js" to="*.min.js" />
+			<targetfile />
+		</apply>
+	</target>
+
+	<!-- This target convert any mixed line endings to crlf. -->
+	<target name="check-crlf">
+		<fixcrlf srcdir="${src.dir}" includes="**/*.js" encoding="UTF-8" fixlast="false" />
+		<fixcrlf srcdir="${test.dir}" includes="**/*.js" encoding="UTF-8" fixlast="false" />
+	</target>
+
+	<target name="do-lint" depends="check-crlf">
+		<jslint haltOnFailure="false" options="sloppy, forin, confusion, plusplus, nomen, vars, regexp, newcap, browser, undef, continue" encoding="UTF-8">
+			<formatter type="plain" />
+			<formatter type="report" destfile="${build.dir}/lintreport.html" />
+			<fileset file="${concat.dir}/d3charts.src.js" />
+		</jslint>
+
+
+		<!-- Set a property that tells if there are unused variables. -->
+		<condition property="lint.variable.error">
+			<or>
+				<resourcecontains resource="${build.dir}/lintreport.html" substring="Undefined variable" />
+				<resourcecontains resource="${build.dir}/lintreport.html" substring="Unused variable" />
+			</or>
+		</condition>
+	</target>
+
+	<!-- This target is only run if there are unused variables. -->
+	<target name="lint" depends="assemble, do-lint" if="lint.variable.error">
+		<echo message="Warning: undefined or unused variables exist. Run 'start build/lintreport.html'." />
+	</target>
+
+	<target name="clean">
+		<echo message="Clear all." />
+		<delete dir="${build.dir}" includes="**/*.*" />
+		<delete dir="${concat.dir}" includes="**/*.*" />
+		<delete dir="${minify.dir}" includes="**/*.*" />
+	</target>
+	
+	<target name="copy">
+		<copy file="${d3charts.js.src}" toFile="${root.dir}/examples/d3charts.src.js" />
+	</target>
+	<target name="build" depends="minify, copy" />
+</project>

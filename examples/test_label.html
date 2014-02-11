@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+<script type="text/javascript" src="../lib/d3.v3.js"></script>
+<script type="text/javascript" src="d3charts.src.js"></script>
+<script>
+function draw() {
+    var svg = d3.select('body').append('svg:svg').attr({
+            width : 800,
+            height : 600
+        });
+    var labelOpts = {
+        enabled : true,
+        text : 'I play SVG!',
+		font: {
+			fontSize:30
+		},
+		anchor:'start',
+		rotation:45,
+		rotationAnchor:'start',
+        border : {
+            enabled : true,
+            stroke : 'blue',
+			strokeOpacity : 0.5,
+            strokeWidth : 5
+        },
+		fill:'#ff0000'
+    };
+	
+	var scale = d3.scale.linear().domain([0, 100]).range([100, 500]);
+	var tickValues = scale.ticks(7);
+	
+	var context = new d3charts.ChartContext();
+	var container = {d3Sel : svg};
+    var ll = new d3charts.Label(container, context, labelOpts);
+	var l = d3.select('svg').append('g');
+	var lUpdate = l.selectAll('.label').data(tickValues);
+	var lEnter = lUpdate.enter().append('g');
+	
+	l.attr('transform', 'translate(100, 100)');
+	function transform(selection, x) {
+		selection.call(d3charts.api.translate, x, 0);
+	}
+
+	ll.fRender(lEnter);
+	lEnter.call(transform, scale);
+
+}
+</script>
+<body onload="draw();">
+</body>
+</html>

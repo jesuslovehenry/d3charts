@@ -1,0 +1,36 @@
+indicator: {
+		fill: 'red',
+        fillOpacity: 1,
+        body: {
+            headRadius: '80%',
+            headSize: '1%',
+            pivotSize: '5%',
+            tailRadius: '20%',
+            tailSize: '2%',
+            fill: 'red',
+            fillOpacity: 1,
+            border: {
+                
+            }
+        },
+//        headMarker: {
+//            shape: 'arrow',//
+//            size: 4,
+//            fill: 'black',
+//            fillOpacity: 1,
+//            border: {}
+//        },
+//        tailMarker: {
+//            shape: 'circle' ,//
+//            size: 4,
+//            fill:'black',
+//            fillOpacity:1,
+//            border:{}
+//        },
+        pivotMarker: {
+            shape: 'circle',
+            size: '%5', // percent of radius
+            fill: 'black',
+            fillOpacity: 1,
+            border: {}
+        }

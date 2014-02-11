@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="../../lib/d3.v3.js"></script>
+    <meta charset="utf-8">
+	<style>
+	body {
+  font: 10px sans-serif;
+  shape-rendering: crispEdges;
+}
+
+.grid-background {
+  fill: #ddd;
+}
+
+.grid line {
+  stroke: #fff;
+}
+
+.grid .minor line {
+  stroke-opacity: .5;
+  stroke: red;
+}
+
+.grid .minor-minor line {
+  stroke-opacity: .5;
+  stroke: blue;
+}
+
+.grid text {
+  display: none;
+}
+
+.axis line {
+  stroke: #fff;
+}
+
+.axis text {
+  fill: #000;
+}
+
+.axis path,
+.grid path {
+  display: none;
+}
+	</style>
+	
+  </head>
+  <body>
+    <input type="range" min="20" max="1000" value="431" onchange="sliderChange()"/>
+    <label></label>
+    <br/>
+    <input type="checkbox" onclick="toggleReal()" checked> Real Axis
+    <input type="checkbox" onclick="toggleFake()" checked> Fake Axis
+    <br/>
+    <br/>
+	<script>
+	var margin = {
+	    top : 0,
+	    right : 10,
+	    bottom : 25,
+	    left : 10
+	},
+	width = 960 - margin.right - margin.left,
+	height = 150 - margin.top - margin.bottom;
+
+	var x = d3.time.scale()
+	    .domain([1, d3.select('input')[0][0].value])
+	    .range([0, width]);
+
+	var svg = d3.select("body").append("svg")
+	    .attr("width", width + margin.right + margin.left)
+	    .attr("height", height + margin.top + margin.bottom)
+	    .append("g")
+	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+	svg.append("rect")
+	.attr("class", "grid-background")
+	.attr('y', 0)
+	.attr("width", width)
+	.attr("height", height * 4);
+
+	var realAxisGroup = svg.append("g");
+
+	var fakeAxisGroup = svg.append("g").attr('class', 'fake');
+
+	var now = d3.time.day(new Date());
+
+	sliderChange();
+
+	// ~
+
+	function sliderChange() {
+	    var v = d3.select('input')[0][0].value;
+
+	    d3.select('label').text(v);
+
+	    x.domain([now, new Date(now.getTime() + 1000 * 60 * 60 * 24 * v)]);
+	    redraw();
+	}
+
+	function redraw() {
+	    // this is the d3's axis
+	    realAxisGroup
+	    .attr("class", "axis")
+	    .attr("transform", "translate(0,0)")
+	    .call(d3.svg.axis().orient('bottom').scale(x).tickSize(12));
+	    /*
+	    var points = [];
+	    realAxisGroup.selectAll('g').data().forEach(function (d, i) {
+	    points.push(x(d));
+	    });
+
+	    console.log(points);
+	    console.log(points[1] - points[0]);
+	    console.log(points[2] - points[1]);
+	    console.log(points[3] - points[2]);
+	     */
+	    // this is our fake axis with a label on every other point
+	    var tickCount = x.ticks().length;
+	    var ticks = x.ticks(tickCount * 2);
+
+	    console.log('ticks', x.ticks().length);
+	    console.log('ticks*2', ticks.length);
+
+	    fakeAxisGroup.attr('transform', 'translate(0,75)');
+
+	    var tickGroups = fakeAxisGroup.selectAll('g').data(ticks, x);
+	    tickGroups.exit().remove();
+
+	    var newTickGroups = tickGroups.enter();
+
+	    var subG = newTickGroups.append('g');
+	    subG.append('line');
+	    subG.append('text');
+
+	    tickGroups.attr('transform', function (d, i, j) {
+	        return 'translate(' + x(d) + ')';
+	    });
+
+	    tickGroups.selectAll('g line')
+	    .attr('x1', 5)
+	    .attr('x2', 5)
+	    .attr('y1', -20)
+	    .attr('y2', function (d, i, j) {
+	        if ((j + 1) % 2 === 0) {
+	            return -10;
+	        } else {
+	            return 10;
+	        }
+	    })
+	    .attr('stroke', 'white');
+
+	    tickGroups.selectAll('g text')
+	    .text(function (d, i, j) {
+	        //console.log(d, i, j, '??', x(d));
+	        if ((j - 1) % 2 === 0) {
+	            return d3.time.format('%-I:%m')(d);
+	        } else {
+	            return '';
+	        }
+	    })
+	    .attr("dy", ".71em").style("text-anchor", "middle");
+	}
+
+	function toggleReal() {
+	    var ds = d3.select('g.axis')[0][0].style;
+
+	    ds.display = (ds.display === '') ? 'none' : '';
+	}
+
+	function toggleFake() {
+	    var ds = d3.select('g.fake')[0][0].style;
+
+	    ds.display = (ds.display === '') ? 'none' : '';
+	}
+	</script>
+  </body>
+</html>
+  
