@@ -1,3 +1,3 @@
 d3charts
 ========
-This project is in development.
+This project is in incubation.
