@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+<head>
+<script type="text/javascript" src="../lib/jquery.js"></script>
+<script type="text/javascript" src="../lib/d3.v3.js"></script>
+<script type="text/javascript" src="hammer.js"></script>
+<script type="text/javascript" src="d3charts.src.js"></script>
+<script type="text/javascript" src="smartcare.js"></script>
+<style>
+.watchItemLabel {
+	font-size: 20px;
+}
+</style>
+</head>
+
+<body onload="draw();">
+<script>
+function draw() {
+	Hammer(d3.select('body').node()).on('swipe', 
+		function(event) {
+			console.log(event);
+		}
+	);
+	var sc = smartcare();
+	sc(d3.select('body'));
+	
+	setInterval(function () {
+		var v = function(){return Math.floor(Math.random() * 10);};
+		var data = {'pulse': v() * 6, 'temperature': v() * 1.5 + 30, 'bloodSugar': v() * 2, 'bloodOxygen': v() * 1.5 + 5, 'bloodPressure': [v() * v(), v() * 5, v() * 9], 'energyInOut': [v() * 20, v() * 20]};
+		sc.onData(data);
+	}, 200);
+}
+</script>
+</body>
+</html>
