@@ -22,9 +22,11 @@ d3charts = {
 	    clone: d3c_clone,
 	    merge: d3c_merge,
 	    translate: d3c_translate
-	}
-	
+	},
+	SimpleBar: SimpleBar,
+	SimpleBarCharts : SimpleBarCharts
 };
+
 window.d3charts = window.d3charts || d3charts;
 
 })();

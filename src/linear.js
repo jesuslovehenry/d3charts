@@ -45,6 +45,13 @@ var DefaultLinearSeriesOptions = {
 //            fillOpacity: 1e-6,
 //            border: {},
 //        }
+//    ,
+//    line : {
+//        enabled: false,
+//        stroke: 'yellow',
+//        strokeWidth:1,
+//        strokeOpacity:1
+//    }
 //    }
 //    ,
 //    ranges : { // Array
@@ -175,19 +182,28 @@ var LinearSeries = d3c_extendClass(null, Element, {
         // Render data pointers
         p.sPointers = d3Sel.selectAll(CN.FN.pointer).data(dataOpts);
         p.sPointersUpdate = (p.sPointers.enter().append('g').attr('class', CN.pointer), d3.transition(p.sPointers));
-        p.sPointersUpdate.each(function (_data, i) {
+        p.sPointersUpdate.each(function (pointerOpts, i) {
             var
-            pointer = d3.select(this).call(d3c_createMarker, _data.marker, h, context),
-            x = scale(_data.value),
-            y = (_data.markerPosition === 'below') ? gadgetBounds.y + gadgetBounds.height : gadgetBounds.y,
+            pointer = d3.select(this).call(d3c_createMarker, pointerOpts.marker, h, context),
+            x = scale(pointerOpts.value),
+            y = (pointerOpts.markerPosition === 'below') ? gadgetBounds.y + gadgetBounds.height : gadgetBounds.y,
             label;
             
             d3c_translate(pointer, x, y);
-            if (_data.label && _data.label.enabled !== false) {
-                label = d3c_createLabel(pointer, _data.label, _data.value, context);
-                d3c_translate(label, 0, (_data.labelPosition === 'below') ? _data.marker.size / 2 : - (label.bbox().height + _data.marker.size / 2));
+            if (pointerOpts.label && pointerOpts.label.enabled !== false) {
+                label = d3c_createLabel(pointer, pointerOpts.label, pointerOpts.value, context);
+                d3c_translate(label, 0, (pointerOpts.labelPosition === 'below') ? pointerOpts.marker.size / 2 : - (label.bbox().height + pointerOpts.marker.size / 2));
 //                label.select('text').attr('dy', (data.position === 'below') ? '.3em' : '.7em');
             };
+            
+            // Create line
+            if (pointerOpts.line && pointerOpts.line.enabled !== false) {
+                var line = pointer.selectAll('line').data([pointerOpts.line]);
+                line.enter().insert('line', CN.FN.marker).attr({'x1': 0, 'y1': 0, 'x2': 0, 'y2': (pointerOpts.markerPosition === 'below') ? -gadgetBounds.height : gadgetBounds.height});
+                d3c_applyBorderStyle(line, pointerOpts.line, {}, context);
+            } else {
+                pointer.selectAll('line').remove();
+            }
         });
         
         // 2. Compute bounds of plot bar.
@@ -210,8 +226,9 @@ var LinearSeries = d3c_extendClass(null, Element, {
         d3c_translate(axisUpdate, eAxis.fOptions().x, eAxis.fOptions().y);
         
         // adjust pointers.
-        p.sPointersUpdate.each(function (_data, i) {
-            d3c_translate(d3.select(this), scale(_data.value), (_data.markerPosition === 'below') ? gadgetBounds.y + gadgetBounds.height : gadgetBounds.y);
+        p.sPointersUpdate.each(function (pointerOpts, i) {
+            d3c_translate(d3.select(this), scale(pointerOpts.value), (pointerOpts.markerPosition === 'below') ? gadgetBounds.y + gadgetBounds.height : gadgetBounds.y);
+            d3.select(this).select('line').attr({'x1': 0, 'y1': 0, 'x2': 0, 'y2': (pointerOpts.markerPosition === 'below') ? -gadgetBounds.height : gadgetBounds.height});
         });
         
         // adjust bands.

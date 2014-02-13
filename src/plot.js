@@ -26,7 +26,7 @@ var Plot = d3c_extendClass(null, Element, {
         
         this.d3Sel = this.d3Sel || this.eContainer.d3Sel.append('g').datum(opts).attr({'x': x, 'y': y, 'class': this.fClassNames()});
         d3c_translate(this.d3Sel, x, y);
-        border = this.d3Sel.append('rect').attr({'x': 0, 'y': 0, 'wdith': w, 'height': h}).datum(opts.border);
+        border = this.d3Sel.append('rect').attr('class', CN.border).attr({'x': 0, 'y': 0, 'width': w, 'height': h}).datum(opts.border);
         d3c_applyBorderStyle(border, opts.border, opts, chartContext);
         
         i = opts.series.length;
@@ -38,8 +38,10 @@ var Plot = d3c_extendClass(null, Element, {
             serieOpts.height = h;
             
             // Adjust series fill with color palette setting.
-            var len = this.chartContext.options.chart.colorPalette.length;
-            serieOpts.fill = serieOpts.fill || this.chartContext.options.chart.colorPalette[i % len];
+            if (this.chartContext.options.chart.colorPalette) {
+                var len = this.chartContext.options.chart.colorPalette.length;
+                serieOpts.fill = serieOpts.fill || this.chartContext.options.chart.colorPalette[i % len];
+            }
             
             this.eSeries.push(series =  d3c_createSeries.call(this, this, this.chartContext, serieOpts));
             series.fRender();

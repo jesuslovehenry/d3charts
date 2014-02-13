@@ -482,8 +482,8 @@ function d3c_adaptFill(fillValue, chartContext) {
  * @param chartContext
  * @returns
  */
-function d3c_adaptDashstyle(name, value, width, chartContext) {
-    var i;
+function d3c_adaptDashstyle(name, v, width, chartContext) {
+    var i, value = v;
     if (typeof value === 'function') {
         return (function (_this) {
             var args = chartContext ? d3.merge(arguments, [chartContext])
@@ -498,15 +498,15 @@ function d3c_adaptDashstyle(name, value, width, chartContext) {
         if (value === 'solid') {
             value = 'none';
         } else if (value) {
-            value = value.replace('shortdashdotdot', '3,1,1,1,1,1,').replace(
-                    'shortdashdot', '3,1,1,1').replace('shortdot', '1,1,')
-                    .replace('shortdash', '3,1,').replace('longdash', '8,3,')
-                    .replace(/dot/g, '1,3,').replace('dash', '4,3,').replace(
+            value = value.replace(/(shortdashdotdot)/g, '3,1,1,1,1,1,').replace(
+                    /(shortdashdot)/g, '3,1,1,1').replace(/(shortdot)/g, '1,1,')
+                    .replace(/(shortdash)/g, '3,1,').replace(/(longdash)/g, '8,3,')
+                    .replace(/(dot)/g, '1,3,').replace(/(dash)/g, '4,3,').replace(
                             /,$/, '').split(','); // ending comma
 
             i = value.length;
             while (i--) {
-                value[i] = pInt(value[i]) * width;
+                value[i] = parseInt(value[i]) * width;
             }
             value = value.join(',');
         }
@@ -537,9 +537,6 @@ function d3c_getBorderWidth(borderStyle) {
  */
 function d3c_adaptBorderStyle(borderStyle, chartContext) {
     if (typeof borderStyle === 'object') {
-        // Adjust property name
-        borderStyle = d3c_toCssStyle(borderStyle);
-        
         // Adjust property value
         for (var k in borderStyle) {
             if (borderStyle.hasOwnProperty(k)) {
@@ -553,6 +550,9 @@ function d3c_adaptBorderStyle(borderStyle, chartContext) {
                 } 
             }
         }
+        
+        // Adjust property name
+        borderStyle = d3c_toCssStyle(borderStyle);
     }
     
     return borderStyle;
@@ -766,6 +766,9 @@ function _values(data, prop, valArray) {
         hasValues = (valArray !== undefined),
         result = [],
         i = 0;
+    if (!prop) {
+        return data;
+    }
     if (type === 'number' || type === 'string' || type === 'boolean') {
         // data is single dimension array with primtive value.
         if (hasValues) {
@@ -782,7 +785,7 @@ function _values(data, prop, valArray) {
             if (hasValues) {
                 _values(data[i], prop, valArray[i]);
             } else {
-                result.concat(_values(data[i], prop) || []);
+                result = result.concat([_values(data[i], prop)] || []);
             }
         }
     } else if (type === 'object') {
@@ -790,7 +793,7 @@ function _values(data, prop, valArray) {
             if (hasValues) {
                 data[i][prop] = valArray[i];
             } else {
-                result.concat(data[i][prop] || []);
+                result = result.concat([data[i][prop]]|| []);
             }
         }
     }

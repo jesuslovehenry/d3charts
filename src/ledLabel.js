@@ -18,7 +18,7 @@ var LedLabel = d3c_extendClass(null, Element, {
         digits : [0],
         _scale : null,
         _dispUpdate : null,
-        _fRender : function () {
+        _fRender : function (g) {
             var
             i = 0,
             opts = this.options,
@@ -26,7 +26,11 @@ var LedLabel = d3c_extendClass(null, Element, {
             digitCount = opts.digitCount,
             gap = opts.gap,
             _scale = this._scale,
-            d3Sel = (this.d3Sel = this.d3Sel || this.eContainer.d3Sel.append('g').attr('class', CN.ledLabel));
+            d3Sel = (this.d3Sel = this.d3Sel || g || this.eContainer.d3Sel.append('g'));
+            
+            if(!d3Sel.attr('class')) {
+                d3Sel.attr('class', CN.ledLabel)
+            }
             
             this.digits = new Array(digitCount);
             for (i = 0; i < digitCount; i++) {

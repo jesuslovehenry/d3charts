@@ -132,6 +132,7 @@ var DialSeries = d3c_extendClass(null, Element, {
     arcFactor: 0.5,
     _fRender: function () {
         var 
+        _this = this,
         chartContext = this.chartContext,
         opts = this.options,
         indicatorOpts = opts.indicator,
@@ -255,7 +256,7 @@ var DialSeries = d3c_extendClass(null, Element, {
             // render pivot
             if (ip && ip.enabled) {
                 ip.size = d3c_adaptNumberOpt(ip.size, radius);
-                paths = d3c_symbol().type(ip.type).size(ip.size * ip.size);
+                paths = (typeof ip.type === 'function') ? ip.type.call(_this, ip) : d3c_symbol().type(ip.type).size(ip.size * ip.size);
                 pivotNode = pointerUpdate.append('path').datum(ip).attr('class', 'pivot').attr('d', paths());
                 d3c_applyBorderStyle(pivotNode, ip.border, ip, chartContext, borderFunctor);
             }
@@ -263,7 +264,7 @@ var DialSeries = d3c_extendClass(null, Element, {
             // render head
             if (ih && ih.enabled) {
                 ih.size = d3c_adaptNumberOpt(ih.size, radius);
-                paths = d3c_symbol().type(ih.type).size(ih.size * ih.size);
+                paths = (typeof ih.type === 'function') ? ih.type.call(_this, ih) : d3c_symbol().type(ih.type).size(ih.size * ih.size);
                 headNode = pointerUpdate.append('path').datum(ih).attr('class', 'head').attr('d', paths());
                 d3c_translate(headNode, 0, -ib.headRadius);
                 d3c_applyBorderStyle(headNode, ih.border, ih, chartContext, borderFunctor);
@@ -272,7 +273,7 @@ var DialSeries = d3c_extendClass(null, Element, {
             // render tail
             if (it && it.enabled) {
                 it.size = d3c_adaptNumberOpt(it.size, radius);
-                paths = d3c_symbol().type(it.type).size(it.size * ih.size);
+                paths = (typeof it.type === 'function') ? it.type.call(_this, it) : d3c_symbol().type(it.type).size(it.size * ih.size);
                 tailNode = pointerUpdate.append('path').datum(it).attr('class', 'tail').attr('d', paths());
                 d3c_translate(tailNode, 0, ib.tailRadius);
                 d3c_applyBorderStyle(tailNode, it.border, it, chartContext, borderFunctor);

@@ -15,10 +15,10 @@ var Label = d3c_extendClass(null, Element, {
         yOffset = opts.yOffset || 0,
         bbox = null,
         borderUpdate = null,
-        textUpdate = null;
+        textUpdate = null,
+        d3Sel = this.d3Sel = g || this.eContainer.d3Sel.append('g').attr('class', CN.label);
         
-        this.d3Sel = g;
-        g.each(function (d, i) {
+        d3Sel.each(function (d, i) {
             var 
             g = d3.select(this),
             text = opts.text || d;

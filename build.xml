@@ -114,6 +114,7 @@
 				<file name="linear.js" />
 				<file name="bullet.js" />
 				<file name="thermometer.js" />
+				<file name="simpleBar.js" />
 				<file name="end.js" />
 			</filelist>
 		</concat>

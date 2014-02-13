@@ -42,6 +42,13 @@ var DefaultBulletSeriesOptions = {
 ////        border : {}
 //        labelPosition: 'outside', // Indicate the value label shows in measure bar or inside or outside
 //        label: {} 
+//    ,
+//    line : {
+//        enabled: false,
+//        stroke: 'yellow',
+//        strokeWidth:1,
+//        strokeOpacity:1
+//    }
 //    }], // Array
 //    targets : [{ // properties are same with data
 //        value: 0,
@@ -130,7 +137,7 @@ var BulletSeries = d3c_extendClass(null, Element, {
             bounds.y = margin.top;
             bounds.width -= (margin.left + margin.right);
             bounds.height -= (margin.top + margin.bottom);
-
+            
             var
             titles = g.selectAll(CN.FN.title).remove().data([titleOpts, subtitleOpts]),
             titleUpdate = (titles.enter().append('g').attr('class', CN.title), titles.transition()),
@@ -212,6 +219,7 @@ var BulletSeries = d3c_extendClass(null, Element, {
                 measuresUpdate.sort(function c(a, b){
                     return b.value < a.value ? -1 : b.value > a.value ? 1 : 0;
                 });
+                p.measures = measuresUpdate;
                 measuresUpdate.each(function(opts, i) {
                     var
                     g = d3.select(this),
@@ -251,6 +259,7 @@ var BulletSeries = d3c_extendClass(null, Element, {
                 targetsUpdate.sort(function c(a, b){
                     return a.value < b.value ? -1 : a.value > b.value ? 1 : 0;
                 });
+                p.targets = targetsUpdate;
                 targetsUpdate.each(function(opts, i) {
                     var
                     g = d3.select(this),
@@ -323,5 +332,47 @@ var BulletSeries = d3c_extendClass(null, Element, {
     },
     fRedraw: function () {
         this.fRender(this.d3Sel);
+    },
+    fTarget : function(i) {
+        if (arguments.length && d3c_isNumber(arguments[0])) {
+            return this._p.targets && d3.select(this._p.targets[0][arguments[0]]);
+        }
+        return this._p.targets;  
+    },
+    fMoveTarget: function(i, value) {
+        var
+        targetUpdate =this.fTarget(i);
+        
+        if(targetUpdate) {
+            var
+            rect = targetUpdate.select('rect');
+            x = parseInt(rect.attr('x')),
+            newX = this.scale(value);
+        
+            if (x != newX) {
+                rect.transition().duration(1000).attr('x', newX);
+            }
+        }
+    },
+    fMeasure: function(i) {
+        if (arguments.length && d3c_isNumber(arguments[0])) {
+            return this._p.measures && d3.select(this._p.measures[0][arguments[0]]);
+        }
+        return this._p.measures;
+    },
+    fChangeMeasure: function(i, value) {
+        var
+        measureUpdate =this.fMeasure(i);
+        
+        if(measureUpdate) {
+            var
+            rect = measureUpdate.select('rect');
+            w = parseInt(rect.attr('width')),
+            newW = this.scale(value);
+        
+            if (w != newW) {
+                rect.transition().duration(1000).attr('width', newW);
+            }
+        }
     }
 });

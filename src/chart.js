@@ -40,6 +40,8 @@ d3c_extendClass(Chart, Element, {
     },
     _fRender : function (selection) {
         var 
+        _this = this,
+        context = this.chartContext,
         p = this._p,
         chart = this,
         opts =  this.chartContext.jointOpts = chart.jointOpts = d3c_mergeChartOptions(d3c_mergeChartOptions(d3c_clone(DefaultOptions), this.themeOpts), this.options),
@@ -173,8 +175,55 @@ d3c_extendClass(Chart, Element, {
             
         // 4 Add chart area
         // 4.1 parse all series to classify series type, some series need axis, some not.
-        // 4.1 Add y axis
-        // 4.2 Add x axis
+        
+//        // 4.1 Add y axis        
+//        var
+//        seriesMap = d3c_getAxisSeries(opts.plot.series);
+//        minMaxY = d3c_calculateScaleDomain(opts.yAxis[0], null, d3c_getSeriesMinMax(seriesMap, 0)),
+//        yAxis0Scale = d3.scale.linear();
+//        yAxis0Scale.domain(minMaxY);
+//        yAxis0Scale.range([remainBounds.height, 0]);
+//        if (opts.yAxis[0] || opts.yAxis[0].enabled !== false) {
+//            eYAxis[0] = new Axis(_this, context, opts.yAxis[0]);
+//            eYAxis[0].fScale(yAxis0Scale);
+//            var
+//            yaxis = chart.d3Sel.selectAll(CN.FN.yAxis + CN.FN.axis).data([opts.yAxis[0]]),
+//            yaxisUpdate = (yaxis.enter().append('g').attr('class', CN.yAxis + ' ' + CN.axis), yaxis),
+//            axisHeight = remainBounds.height;
+//            axisUpdate.call(d3c_translate, remainBounds.x, remainBounds.y);
+//            eYAxis[0].fRender(yaxisUpdate);
+//        }
+//        
+//        // 4.2 Add x axis
+//        var
+//        yaxisBBox = yaxisUpdate.bbox(true),
+//        xaxisDomain = [],
+//        xRange = [0, remainBounds.width - yaxisBBox.width],
+//        xaxisScale = d3.scale.ordinal();
+//        xaxisScale.range(xRange);
+//        if (opts.categoryType === 'datetime') {
+//            xaxisDomain = [new Date().setTime(opts.category[0]), new Date().setTime(opts.category[opts.category.length - 1])];
+//            xaxisScale.domain(xaxisDomain);
+//        } else  {
+//            xaxisDomain = [opts.category[0], opts.category[opts.category.length - 1]];
+//            xaxisScale.domain(xaxisDomain);
+//        }
+//        
+//        if (opts.xAxis || opts.xAxis.enabled !== false) {
+//            eXAxis[0] = new Axis(_this, context, opts.xAxis);
+//            eXAxis[0].fScale(xaxisScale);
+//            var
+//            xaxis = chart.d3Sel.selectAll(CN.FN.xAxis + CN.FN.axis).data([opts.xAxis]),
+//            xaxisUpdate = (xaxis.enter().append('g').attr('class', CN.xAxis + ' ' + CN.axis), xaxis);
+//            xaxisUpdate.call(d3c_translate, remainBounds.x + yaxisBBox.width, remainBounds.y + remainBounds.height);
+//            eXAxis.fRender(xaxisUpdate);
+//        }
+//        
+//        // Adjust position of y axis and x axis
+        
+        
+        
+        
         // 4.3 Add plot & series
         
         d3c_merge(chartOpts.plot, remainBounds); // set plot bounds.
@@ -288,5 +337,39 @@ d3c_extendClass(Chart, Element, {
     }
 });
 
+function d3c_getSeriesMinMax(seriesMap, yAxisKey, valueKey) {
+    var arr = [];
+    for (var s in seriesMap.get(yAxisKey)) {
+        arr = d3.merge([arr, d3c_seriesValues(s.data, valueKey)]);
+    }
+    arr = [d3.min(arr), d3.max(arr)];
+    
+}
 
+function d3c_getAxisSeries(seriesOpts) {
+    var
+    series = null,
+    sMap = d3.map();
+    for (var s in seriesOpts) {
+        series = seriesOpts[s];
+        if (d3c_isAxisSeries(series.type)) {
+            sMap.set(series.axisIndex || 0, series);
+        } else {
+            sMap.set('noaixs', series);
+        }
+    }
+}
+
+function d3c_isAxisSeries(seriesType) {
+    switch(seriesType) {
+    case 'bar':
+    case 'line':
+    case 'area':
+    case 'scatter':
+    case 'bubble':
+    case 'gantt':
+        return true;
+    }
+    return false;
+}
    
