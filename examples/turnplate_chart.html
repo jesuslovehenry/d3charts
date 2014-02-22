@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+<script type="text/javascript" src="../lib/d3.v3.js"></script>
+<script type="text/javascript" src="turnplateChart.js"></script>
+<script>
+function draw() {
+    var chartDiv = d3.select('#chart1');
+	var turnplate = d3.chart.turnplate();
+	turnplate.cx(200).cy(200).radius(150).transitionCallback(turnplate.CenterSpreadTransition);
+	turnplate(chartDiv);
+	
+	chartDiv = d3.select('#chart2');
+	turnplate = d3.chart.turnplate();
+	turnplate.cx(200).cy(200).radius(150)
+	.wheelStyles({'fill':'pink', 'fill-opacity':0.2, 'stroke':'red', 'stroke-width':1})
+	.itemStyles({'stroke':'blue', 'stroke-width':1}).transitionCallback(turnplate.InPlaceTransition);
+	turnplate(chartDiv);
+	}
+</script>
+<body onload="draw();">
+<div id="chart1" style="width:400px;height:400px"></div>
+<div id="chart2" style="width:400px;height:400px"></div>
+</body>
+</html>

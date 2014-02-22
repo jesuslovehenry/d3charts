@@ -587,7 +587,7 @@ var smartcare = function () {
 
         plot.append('text')
         .attr('class', 'watchItemLabel')
-        .text('Heartbeat')
+        .text('Body Temp.')
         .attr('dy', '1em')
         .attr('transform', 'translate(' + (bounds.width - 10) + ', 10)')
         .style('text-anchor', 'end')
@@ -1067,4 +1067,62 @@ var smartcare = function () {
         }, fontSize);
     }
     return _sc;
+}
+
+var DaySummary = function() {
+    var d = new Date();
+    function draw(g, bounds) {
+        var opts = {
+            title : 'Simple bar Chart A',
+            font : {},
+            subtitleFont : {},
+            fill : function (y, context) {
+                if (!arguments.length) {
+                    return 'green';
+                }
+                return y > 50 ? 'red' : y > 30 ? 'yellow' : 'green';
+            },
+            fillOpacity : 1,
+            border : {
+                stroke : 'blue',
+                strokeWidth : 1
+            },
+            categoryType : 'date',
+            categoryLabelFont : {},
+            seriesLabelFont : {},
+            xDataFormat : d3.time.format('%H'),
+            yDataFormat : function (y) {
+                return d3.round(y, 0);
+            }
+        };
+		
+		// Generate random data
+        var chartOpts = [],
+			keys = ['Pulse', 'Body Temp.', 'Blood Sugar', 'Blood Oxygen', 'Blood Pressure', 'Energy In', 'Energy Out'];
+        for (var i = 0; i < keys.length; i++) {
+            var o = d3charts.api.clone(opts);
+            o.title = keys[i];
+            o.data = getData();
+            chartOpts.push(o);
+        }
+
+        var simpleBarCharts = new d3charts.SimpleBarCharts();
+        simpleBarCharts.bounds(bounds).data(chartOpts);
+        simpleBarCharts(g);
+
+        return draw;
+    }
+
+    function getData() {
+        var v = [];
+        for (var i = 0; i < 24; i++) {
+            v.push({
+                'x' : (d.setHours(i % 23), d.getTime()),
+                'y' : Math.random() * 100,
+            })
+        }
+        return v;
+    }
+	
+    return draw;
 }

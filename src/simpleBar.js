@@ -3,7 +3,7 @@
  */
 //var SimpleBarOpts = {
 //    title:'',
-//    subTitle:'',    
+//    subtitle:'',    
 //      font:{},
 //      subtitleFont:{},
 //    fill:,
@@ -13,6 +13,8 @@
 //        x:'',
 //        y:''
 //    }],
+//        categoryType: ''
+//        categoryLabelFont:{},
 //      seriesLabelFont:{},
 //      xDataFormat:'',
 //      yDataFormat:'',
@@ -48,63 +50,76 @@ var SimpleBar = function(_chartContext) {
                     .text(title),
                 titleBBox = (d3c_applyFontStyle(titleUpdate, opts.font, chartContext), titleUpdate.bbox(true));
             }
-            minLabel = g.selectAll('.minLabel').data([minMaxY[0]]),
-            minLabelUpdate = minLabel.enter().append('text')
-                .attr('class', '.minLabel')
+            
+            var
+            subtitle = g.selectAll('.subtitle').data([minMaxY[0]]),
+            subtitleLabel = opts.subtitle || (opts.yDataFormat ? opts.yDataFormat(minMaxY[0]) : minMaxY[0]) + ' - ' + (opts.yDataFormat ? opts.yDataFormat(minMaxY[1]) : minMaxY[1]),
+            subtitleUpdate = subtitle.enter().append('text')
+                .attr('class', '.subtitle')
                 .attr('dy', '.8em')
                 .attr({'x': 0, 'y': (titleBBox || {'height': height}).height})
-                .text('Min: ' + opts.yDataFormat ? opts.yDataFormat(minMaxY[0]) : minMaxY[0]),
-            minLabelBBox = (d3c_applyFontStyle(minLabelUpdate, opts.subtitleFont, chartContext), minLabelUpdate.bbox(true)),
-            maxLabel = g.selectAll('.maxLabel').data([minMaxY[1]]),
-            maxLabelUpdate = maxLabel.enter().append('text')
-                .attr('class', '.maxLabel')
-                .attr('dy', '.8em')
-                .attr({'x': 0, 'y': titleBBox.height + minLabelBBox.height})
-                .text('Max: ' + opts.yDataFormat ? opts.yDataFormat(minMaxY[1]) : minMaxY[1]),
-            maxLabelBBox = (d3c_applyFontStyle(maxLabelUpdate, opts.subtitleFont, chartContext), maxLabelUpdate.bbox(true)),
-            totalBBox = g.selectAll('.title, .minLabel, .maxLabel').bbox(true);
+                .text(subtitleLabel),
+            subtitleBBox = (d3c_applyFontStyle(subtitleUpdate, opts.subtitleFont, chartContext), subtitleUpdate.bbox(true)),
+            totalBBox = g.selectAll('.title, .subtitle').bbox(true);
             
             b.x = totalBBox.width;
             b.width -= totalBBox.width; 
             
             var
-            barsGroup = g.selectAll('.barGroup').data(data);
+            barsGroup = g.selectAll('.barGroup').data([data]);
             barsGroup.enter().append('g').attr('class', 'barGroup');
             d3c_translate(barsGroup, b.x, b.y);
             barsGroup.exit().remove();
-            var 
-            barsUpdate = barsGroup.selectAll('.bar').data(data);
-            barsUpdate.enter().append('g').attr('class', 'bar');
-            barsUpdate.exit().remove;
-            barsUpdate.attr("transform", function(d, i) { return "translate(" + (i * barWidth) + ",0)"; });
-            
-            barsUpdate.each(function(d, i) {
-                var g = d3.select(this);
-                
-                g.selectAll('.dataPoint').data([d]).enter().append('rect').attr('class', 'dataPoint');
-                g.selectAll('.seriesLabel').data([d]).enter().append('text').attr('class', 'seriesLabel');
-//                barsUpdate.selectAll('.categoryLabel').enter().append('text').attr('class', 'categoryLabel');
-
-                var barsDataPoints = g.select('.dataPoint')
-                    .attr('y', height)
-                    .attr('height', 0)
-                    .attr('width', barWidth - 1)
-                    .call(d3c_applyBorderStyle, opts.border, opts, chartContext)
-                    .transition().duration(1000)
-                    .attr('y', y(d.y))
-                    .attr('height', height - y(d.y));
-                var barsSeriesLabels = g.select('.seriesLabel')
+            barsGroup.each(function(d){
+                var barsGroup = d3.select(this);
+                barsUpdate = barsGroup.selectAll('.bar').data(d);
+                barsUpdate.enter().append('g').attr('class', 'bar');
+                barsUpdate.exit().remove;
+                barsUpdate.each(function(d, i) {
+                    var
+                    g = d3.select(this).attr('transform', 'translate(' + (i * barWidth) + ',0)'),
+                    dpUpdate = g.selectAll('.dataPoint').data([d]),
+                    slUpdate = g.selectAll('.seriesLabel').data([d]);
+                    clUpdate = g.selectAll('.categoryLabel').data([d]);
+                    
+                    dpUpdate.enter().append('rect').attr('class', 'dataPoint');
+                    dpUpdate.exit().remove();
+                    slUpdate.enter().append('text').attr('class', 'seriesLabel');
+                    slUpdate.exit().remove();
+                    clUpdate.enter().append('text').attr('class', 'categoryLabel');
+                    clUpdate.exit().remove();
+                    
+                    clUpdate
+                    .style('text-anchor', 'middle')
                     .attr("x", barWidth / 2)
-                    .attr("y", y(d.y) + 3)
-                    .attr("dy", ".75em")
-                    .text(opts.yDataFormat ? opts.yDataFormat(d.y) : d.y)
-                    .call(d3c_applyFontStyle, opts.seriesLabelFont, chartContext);
-//               var barsCategoryLabels = barGroup.selectAll('categoryLabel')
-//                    .attr("x", barWidth / 2)
-//                    .attr("y", function(d) { return y(d.y) + 3; })
-//                    .attr("dy", ".75em")
-//                    .text(function(d) { rreturn d.y; });    
+                    .attr("y", height)
+                    .attr("dy", "-.2em")
+                    .text(adaptCategoryData(opts, d.x))
+                    .call(d3c_applyFontStyle, opts.categoryLabelFont, chartContext);   
+                    
+                    var
+                    clBBox = clUpdate.node().getBBox(),
+                    newH = height - clBBox.height;
+                    
+                    dpUpdate.attr('y', newH)
+                        .attr('height', 0)
+                        .attr('width', barWidth - 1)
+                        .call(d3c_applyBorderStyle, opts.border, opts, chartContext)
+                        .transition().duration(1000)
+                        .attr('y', y(d.y))
+                        .attr('height', newH - y(d.y))
+                        .style('fill', getFill.call(this, opts.fill, chartContext, d.y) );
+                     slUpdate
+                         .style('text-anchor', 'middle')    
+                         .attr('transform', 'translate(' + (barWidth /2 ) + ',' + Math.min((y(d.y)+ 10), newH - 10) + ') rotate(-90)') 
+                         .attr("x", 0)
+                         .attr("y", 0)
+                         .attr("dy", ".3em")
+                         .text(opts.yDataFormat ? opts.yDataFormat(d.y) : d.y)
+                         .call(d3c_applyFontStyle, opts.seriesLabelFont, chartContext);
+                });
             });
+            
             
         });
         return this;
@@ -127,6 +142,27 @@ var SimpleBar = function(_chartContext) {
         }
         return bar;
     };
+    
+    function getFill(fill, context, y) {
+        if (fill) {
+            if (typeof fill === 'string') { 
+                return d3c_adaptFill(fill, context); 
+            } else if(typeof fill === 'function') {
+                return fill.call(this, y, context);
+            } 
+        }
+        return fill;
+    }
+    
+    function adaptCategoryData(opts, value) {
+        var d = value, t;
+        if (opts.categoryType === 'date') {
+            t = new Date();
+            t.setTime(d);
+            d = t;
+        }
+        return opts.xDataFormat ? opts.xDataFormat(d) : d;
+    }
     
     return bar;
 }
@@ -156,7 +192,7 @@ var SimpleBarCharts = function() {
         simpleBar = simpleBar || new SimpleBar(chartContext);
         simpleBar.width(width).height(barHeight);
         simpleBar(barCharts);
-        barCharts.transition().each(function(d, i){
+        barCharts.each(function(d, i){
             d3c_translate(d3.select(this), x, barHeight * i);
         });
     }
